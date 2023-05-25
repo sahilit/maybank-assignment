@@ -1,4 +1,4 @@
-import { GET_LOCATION_COORDINATES } from "@/actionTypes/map";
+import { GET_LOCATION_COORDINATES, GET_LIVE_LOCATION_COORDINATES } from "@/actionTypes/map";
 import { ILocation } from "@/interfaces/map";
 
 interface IInitialState {
@@ -14,7 +14,7 @@ interface IAction {
 
 const initialState: IInitialState = {
     loading: false,
-    location: { lat: 19.422278109361613, lng: 72.81292141003995 },
+    location: { lat: 0, lng: 0 },
     searchHistory: []
 };
   
@@ -25,6 +25,13 @@ export function getMapDetails(state: IInitialState = initialState, action: IActi
                 location: action.payload,
                 loading: true,
                 searchHistory: [...state.searchHistory, action.payload?.formatted_address],
+            };
+  
+        case GET_LIVE_LOCATION_COORDINATES:
+            return {
+                location: action.payload,
+                loading: true,
+                searchHistory: [],
             };
   
         default:

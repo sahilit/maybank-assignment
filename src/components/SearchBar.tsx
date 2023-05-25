@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import TextField from "@mui/material/TextField";
-import { getMapDetails } from "@/actions/map";
+import { getMapDetails, getLiveLocation } from "@/actions/map";
 import { connect } from "react-redux";
 import { useDispatch } from "react-redux";
 
@@ -25,12 +25,37 @@ function SearchBar() {
     }
   };
 
+  const handleLocationError = (browserHasGeolocation: boolean) => {
+    const error = browserHasGeolocation
+      ? "Error: The Geolocation service failed."
+      : "Error: Your browser doesn't support geolocation.";
+  };
+
   useEffect(() => {
+    // Get current location
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const pos = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          };
+          dispatch(getLiveLocation(pos));
+        },
+        () => handleLocationError(true)
+      );
+    } else {
+      // Browser doesn't support Geolocation
+      handleLocationError(false);
+    }
+
+    // AutoComplete Options
     autoCompleteRef.current = new window.google.maps.places.Autocomplete(
       inputRef.current,
       options
     );
 
+    // On Selection of AutoComplete Options
     autoCompleteRef.current.addListener("place_changed", handlePlaceChanged);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -49,6 +74,7 @@ function SearchBar() {
 
 const mapDispatchToProps = {
   getMapDetails,
+  getLiveLocation,
 };
 
 export default connect(null, mapDispatchToProps)(SearchBar);
